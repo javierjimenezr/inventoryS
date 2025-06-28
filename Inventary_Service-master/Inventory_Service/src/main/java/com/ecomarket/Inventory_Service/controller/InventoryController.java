@@ -1,11 +1,14 @@
 package com.ecomarket.Inventory_Service.controller;
 
+import com.ecomarket.Inventory_Service.Exeption.ResourceNotFoundException;
 import com.ecomarket.Inventory_Service.model.Inventory;
 import com.ecomarket.Inventory_Service.service.InventoryService;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 @RestController
 @RequestMapping("/api/inventory")
 public class InventoryController {
@@ -16,38 +19,102 @@ public class InventoryController {
         this.service = service;
     }
 
+    // Crear nuevo inventario
     @PostMapping
-    public Inventory create(@RequestBody Inventory inventory) {
-        return service.createInventory(inventory);
+    public ResponseEntity<?> create(@RequestBody Inventory inventory) {
+        try {
+            Inventory created = service.createInventory(inventory);
+            return ResponseEntity.ok(created);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body("Error al crear inventario: " + e.getMessage());
+        }
     }
 
-    @PutMapping("/{id}")
-    public Inventory update(@PathVariable Long id, @RequestBody Inventory inventory) {
-        return service.updateInventory(id, inventory);
+    // Actualizar inventario por ID
+    @PutMapping("/{id}_actualizar")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Inventory inventory) {
+        try {
+            Inventory updated = service.updateInventory(id, inventory);
+            return ResponseEntity.ok(updated);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body("Inventario no encontrado: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body("Error al actualizar inventario: " + e.getMessage());
+        }
     }
 
+    // Eliminar inventario por ID
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        service.deleteInventory(id);
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        try {
+            service.deleteInventory(id);
+            return ResponseEntity.noContent().build(); // HTTP 204
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body("Inventario no encontrado: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body("Error al eliminar inventario: " + e.getMessage());
+        }
     }
 
+    // Obtener todos los inventarios
     @GetMapping
-    public List<Inventory> getAll() {
-        return service.getAllInventory();
+    public ResponseEntity<?> getAll() {
+        try {
+            List<Inventory> list = service.getAllInventory();
+            return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body("Error al obtener inventarios: " + e.getMessage());
+        }
     }
 
+    // Obtener inventario por ID
     @GetMapping("/{id}")
-    public Inventory getById(@PathVariable Long id) {
-        return service.getInventoryById(id);
+    public ResponseEntity<?> getById(@PathVariable Long id) {
+        try {
+            Inventory inventory = service.getInventoryById(id);
+            return ResponseEntity.ok(inventory);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body("Inventario no encontrado: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body("Error interno: " + e.getMessage());
+        }
     }
 
-    @PostMapping("/{id}/reduce-stock")
-    public Inventory reduceStockById(@PathVariable Long id, @RequestParam int amount) {
-        return service.reduceStockById(id, amount);
+    // Reducir stock
+    @PutMapping("/{id}/reduce-stock")
+    public ResponseEntity<?> reduceStockById(@PathVariable Long id, @RequestParam int amount) {
+        try {
+            Inventory updated = service.reduceStockById(id, amount);
+            return ResponseEntity.ok(updated);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body("Inventario no encontrado: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body("Error al reducir stock: " + e.getMessage());
+        }
     }
-    
-    @PostMapping("/{id}/increase-stock")
-    public Inventory increaseStockById(@PathVariable Long id, @RequestParam int amount) {
-        return service.increaseStockById(id, amount);
+
+    // Aumentar stock
+    @PutMapping("/{id}/increase-stock")
+    public ResponseEntity<?> increaseStockById(@PathVariable Long id, @RequestParam int amount) {
+        try {
+            Inventory updated = service.increaseStockById(id, amount);
+            return ResponseEntity.ok(updated);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body("Inventario no encontrado: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body("Error al aumentar stock: " + e.getMessage());
+        }
     }
 }
