@@ -1,8 +1,6 @@
 package com.ecomarket.Inventory_Service.service;
 
 
-
-
 import com.ecomarket.Inventory_Service.model.Inventory;
 import java.util.List;
 
